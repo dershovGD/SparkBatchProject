@@ -1,25 +1,14 @@
+package top_spending_countries
+
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.hive.test.TestHive
-import org.apache.spark.sql.types._
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSuite}
-import org.scalatest._
-import Matchers._
+import org.apache.spark.sql.types.{DecimalType, StringType, StructField, StructType}
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 
-class TopNSpendingCountriesTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfterAll {
+class TopNSpendingCountriesDFTest extends FunSuite {
   private val hiveContext = TestHive
   private val sc = hiveContext.sparkContext
-
-  test("testRDDCalculation") {
-    val expected = Array (("England", BigDecimal("1249.54442975586234521045980727649293839931488037109375")),
-      ("Russia", BigDecimal("1169.4425687337158166201334097422659397125244140625")),
-      ("Austria", BigDecimal("9")))
-
-    val actual = new TopNSpendingCountries(hiveContext).calculateUsingRDD(
-      "src/test/resources/topProductsByCategories.csv",
-      "src/test/resources/countries_ip.csv", 3)
-
-    assert(actual === expected)
-  }
 
   test("testDFCalculation") {
     val expectedSchema = new StructType().
@@ -31,12 +20,11 @@ class TopNSpendingCountriesTest extends FunSuite with BeforeAndAfterEach with Be
       Row("Austria", BigDecimal("9.000000000000")))
     val expectedDF = hiveContext.createDataFrame(sc.parallelize(expectedData), expectedSchema)
 
-    val actualDF = new TopNSpendingCountries(hiveContext).calculateUsingDF(
+    val actualDF = new TopNSpendingCountriesDF(hiveContext).calculateUsingDF(
       "src/test/resources/topProductsByCategories.csv",
       "src/test/resources/countries_ip.csv", 3)
     assert(actualDF.schema === expectedSchema)
     actualDF.collect() should contain theSameElementsAs  expectedDF.collect()
   }
-
 
 }

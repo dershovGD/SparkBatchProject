@@ -1,26 +1,14 @@
+package top_products_by_categories
+
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.hive.test.TestHive
 import org.apache.spark.sql.types._
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSuite}
-import org.scalatest._
-import Matchers._
+import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 
-class TopNProductsByCategoryTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfterAll {
+class TopNProductsByCategoryDFTest extends FunSuite {
   private val hiveContext = TestHive
   private val sc = hiveContext.sparkContext
-
-  test("testRDDCalculation") {
-    val devices = List(("mouse",6), ("monitor",10), ("iphone",11))
-    val toys = List(("teddyBear",5))
-    val autos = List(("citroen",3), ("peugeot",5), ("reno",4))
-
-    val expected = Array(("device", devices), ("toy", toys), ("auto", autos))
-
-    val actualRDD = new TopNProductsByCategory(hiveContext).calculateUsingRDD("src/test/resources/topProductsByCategories.csv", 3)
-    val actualArray = actualRDD.mapValues(_.toList).collect()
-    assert (actualArray === expected)
-
-  }
 
   test("testDFCalculation") {
     val expectedSchema = new StructType().
@@ -36,10 +24,9 @@ class TopNProductsByCategoryTest extends FunSuite with BeforeAndAfterEach with B
       Row("toy", "teddyBear", 5L, 1))
     val expectedDF = hiveContext.createDataFrame(sc.parallelize(expectedData), expectedSchema)
 
-    val actualDF = new TopNProductsByCategory(hiveContext).calculateUsingDF("src/test/resources/topProductsByCategories.csv", 3)
+    val actualDF = new TopNProductsByCategoryDF(hiveContext).calculateUsingDF("src/test/resources/topProductsByCategories.csv", 3)
     assert(actualDF.schema === expectedSchema)
     actualDF.collect() should contain theSameElementsAs  expectedDF.collect()
   }
-
 
 }

@@ -1,3 +1,5 @@
+package utils
+
 import java.sql.{Connection, DriverManager}
 
 import org.apache.spark.sql.Row

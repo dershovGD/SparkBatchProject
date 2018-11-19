@@ -1,3 +1,5 @@
+package utils
+
 import java.sql.Timestamp
 
 import org.apache.spark.rdd.RDD
@@ -5,7 +7,7 @@ import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row}
 
-class InputOutputProcessor(private val hiveContext: HiveContext) {
+class InputProcessor(private val hiveContext: HiveContext) {
 
   def readFromFile(inputFile: String): RDD[Array[String]] = {
     val separator = ","
