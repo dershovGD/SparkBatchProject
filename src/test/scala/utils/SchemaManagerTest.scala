@@ -21,11 +21,29 @@ class SchemaManagerTest extends FunSuite {
       ("toy", "teddyBear", 5L))
     val rdd = TestHive.sparkContext.parallelize(expectedData)
 
-    val actualDF = new SchemaManager(TestHive, new InputProcessor(TestHive.sparkContext)).
+    val actualDF = new SchemaManager(TestHive).
       createTopProductsByCategoriesDF(rdd)
     assert(actualDF.schema === schema)
     assert(actualDF.count == 3)
     actualDF.collect() should contain theSameElementsAs expectedData.map(e => Row(e._1, e._2, e._3))
+  }
+
+  test("testCreateTopCategoriesDF") {
+    val schema: StructType = new StructType().
+      add(StructField("category", StringType, nullable = true)).
+      add(StructField("count", LongType, nullable = false))
+
+
+    val expectedData = Array(
+      ("auto", 5L),
+      ("device", 11L),
+      ("toy", 5L))
+
+    val actualDF = new SchemaManager(TestHive).
+      createTopCategoriesDF(expectedData)
+    assert(actualDF.schema === schema)
+    assert(actualDF.count == 3)
+    actualDF.collect() should contain theSameElementsAs expectedData.map(e => Row(e._1, e._2))
   }
 
 }

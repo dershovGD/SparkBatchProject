@@ -8,8 +8,7 @@ import utils._
 
 class TopNCategoriesDF(private val hiveContext: HiveContext) extends Calculator{
   def calculateUsingDF(inputFile: String, n: Int): DataFrame = {
-    val inputProcessor = new InputProcessor(hiveContext.sparkContext)
-    val schemaManager = new SchemaManager(hiveContext, inputProcessor)
+    val schemaManager = new SchemaManager(hiveContext)
     schemaManager.createEventsDF(inputFile).
       groupBy("category").
       count().

@@ -9,7 +9,7 @@ import org.apache.spark.sql.types._
 
 import collection.JavaConversions._
 
-class SchemaManager(private val hiveContext: HiveContext, private val inputProcessor: InputProcessor) {
+class SchemaManager(private val hiveContext: HiveContext) {
   def createEventsDF(inputFile: String): DataFrame = {
     val schema = new StructType().
       add(StructField("product_name", StringType, nullable = true)).
@@ -19,7 +19,7 @@ class SchemaManager(private val hiveContext: HiveContext, private val inputProce
       add(StructField("ip_address", StringType, nullable = true))
 
     val stringsToRow: Array[String] => Row = t => Row(t(0), BigDecimal(t(1)), Timestamp.valueOf(t(2)), t(3), t(4))
-    val rows = inputProcessor.readFromFile(inputFile).map(stringsToRow)
+    val rows = new InputProcessor(hiveContext.sparkContext).readFromFile(inputFile).map(stringsToRow)
 
     hiveContext.createDataFrame(rows, schema)
   }
@@ -31,7 +31,7 @@ class SchemaManager(private val hiveContext: HiveContext, private val inputProce
       add(StructField("country_name", StringType, nullable = true))
 
     val stringsToRow: Array[String] => Row = t => Row(t(0), t(1), t(2))
-    val rows = inputProcessor.readFromFile(inputFile).map(stringsToRow)
+    val rows = new InputProcessor(hiveContext.sparkContext).readFromFile(inputFile).map(stringsToRow)
 
     hiveContext.createDataFrame(rows, schema)
   }
@@ -40,7 +40,7 @@ class SchemaManager(private val hiveContext: HiveContext, private val inputProce
     val schema: StructType = new StructType().
       add(StructField("category", StringType, nullable = true)).
       add(StructField("count", LongType, nullable = false))
-    val rows = topCategories.map(Row(_))
+    val rows = topCategories.map(e => Row(e._1, e._2))
     hiveContext.createDataFrame(rows.toSeq, schema)
   }
 
@@ -59,7 +59,7 @@ class SchemaManager(private val hiveContext: HiveContext, private val inputProce
       add(StructField("country_name", StringType, nullable = true)).
       add(StructField("total_purchases", DecimalType(38, 12), nullable = true))
 
-    val rows = topSpendingCountries.map(Row(_))
+    val rows = topSpendingCountries.map(e => Row(e._1, e._2))
     hiveContext.createDataFrame(rows.toSeq, schema)
   }
 }

@@ -4,7 +4,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{desc, row_number}
 import org.apache.spark.sql.hive.HiveContext
-import utils.{InputProcessor, SchemaManager}
+import utils.SchemaManager
 
 class TopNProductsByCategoryDF(private val hiveContext: HiveContext) {
   def calculateUsingDF(inputFile: String, n: Int): DataFrame = {
@@ -12,8 +12,7 @@ class TopNProductsByCategoryDF(private val hiveContext: HiveContext) {
       partitionBy("category").
       orderBy(desc("count"))
 
-    val inputProcessor = new InputProcessor(hiveContext.sparkContext)
-    val schemaManager = new SchemaManager(hiveContext, inputProcessor)
+    val schemaManager = new SchemaManager(hiveContext)
 
     val dataFrame = schemaManager.createEventsDF(inputFile).
       groupBy("category", "product_name").
