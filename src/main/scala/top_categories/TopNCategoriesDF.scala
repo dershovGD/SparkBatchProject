@@ -1,6 +1,6 @@
 package top_categories
 
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{SparkConf, SparkContext, SparkFiles}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.desc
 import org.apache.spark.sql.hive.HiveContext
@@ -33,7 +33,10 @@ object TopNCategoriesDF {
     val conf = new SparkConf()
       .setMaster("local[3]")
       .setAppName("TopNCategoriesDF")
+      .set("spark.mapreduce.input.fileinputformat.input.dir.recursive", "true")
     val sc = new SparkContext(conf)
+    sc.addFile("file:/home/cloudera/tmp/events/18/10/31", recursive = true)
+    sc.hadoopConfiguration.set("mapreduce.input.fileinputformat.input.dir.recursive","true")
 
     new TopNCategoriesDF(new HiveContext(sc)).calculateUsingDF(args(0), 10)
   }

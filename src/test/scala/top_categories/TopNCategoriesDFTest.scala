@@ -21,7 +21,7 @@ class TopNCategoriesDFTest extends FunSuite {
 
     val expectedDF = hiveContext.createDataFrame(sc.parallelize(expectedData), expectedSchema)
 
-    val actual = new TopNCategoriesDF(hiveContext).calculateUsingDF("src/test/resources/topCategories.csv", 3)
+    val actual = new TopNCategoriesDF(hiveContext).calculateUsingDF("src/test/resources/topCategories", 3)
     assert(actual.schema === expectedDF.schema)
     actual.collect() should contain theSameElementsAs  expectedDF.collect()
   }
