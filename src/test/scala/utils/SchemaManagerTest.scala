@@ -1,5 +1,6 @@
 package utils
 
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.hive.test.TestHive
 import org.apache.spark.sql.types.{LongType, StringType, StructField, StructType}
 import org.scalatest.FunSuite
@@ -14,7 +15,7 @@ class SchemaManagerTest extends FunSuite {
       add(StructField("count", LongType, nullable = false))
 
 
-    val expectedData = Seq(
+    val expectedData = Array(
       ("auto", "peugeot", 5L),
       ("device", "iphone", 11L),
       ("toy", "teddyBear", 5L))
@@ -23,7 +24,8 @@ class SchemaManagerTest extends FunSuite {
     val actualDF = new SchemaManager(TestHive, new InputProcessor(TestHive.sparkContext)).
       createTopProductsByCategoriesDF(rdd)
     assert(actualDF.schema === schema)
-    actualDF.collect() should contain theSameElementsAs expectedData
+    assert(actualDF.count == 3)
+    actualDF.collect() should contain theSameElementsAs expectedData.map(e => Row(e._1, e._2, e._3))
   }
 
 }
