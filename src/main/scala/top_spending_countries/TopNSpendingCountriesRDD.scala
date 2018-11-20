@@ -5,7 +5,7 @@ import org.apache.spark.sql.hive.HiveContext
 import utils.InputProcessor
 
 class TopNSpendingCountriesRDD(private val hiveContext : HiveContext) {
-  private val processor = new InputProcessor(hiveContext)
+  private val processor = new InputProcessor(hiveContext.sparkContext)
   def calculateUsingRDD(inputPurchases: String, inputCountries: String, n: Int) : Array[(String, BigDecimal)] = {
     val purchases = processor.readFromFile(inputPurchases).
       map(line => (line(4), BigDecimal(line(1)))).

@@ -5,7 +5,7 @@ import utils.InputProcessor
 
 class TopNCategoriesRDD(private val hiveContext : HiveContext) {
   def calculateUsingRDD(inputFile: String, n: Int): Array[(String, Int)] = {
-    new InputProcessor(hiveContext).readFromFile(inputFile).
+    new InputProcessor(hiveContext.sparkContext).readFromFile(inputFile).
       map(line => (line(3), 1)).
       reduceByKey(_ + _).
       sortBy(_._2, ascending = false).

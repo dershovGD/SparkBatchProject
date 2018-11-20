@@ -19,18 +19,22 @@ class NElementsSet[T](private val n: Int, private val comparator: Comparator[T])
         queue.add(elem)
       }
     }
-    return this
+    this
   }
 
   def toList: List[T] = {
-    return new util.ArrayList[T](queue).asScala.toList
+    new util.ArrayList[T](queue).asScala.toList
+  }
+
+  def listWithKey[K](key : K) : List[(K, T)] = {
+    toList.map((key, _))
   }
 
   def ++=(anotherSet: NElementsSet[T]): NElementsSet[T] = {
     for (e <- anotherSet.toList) {
       this += e
     }
-    return this
+    this
   }
 
   override def toString = queue.toString

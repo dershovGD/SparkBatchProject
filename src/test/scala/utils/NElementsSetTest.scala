@@ -30,4 +30,14 @@ class NElementsSetTest extends FunSuite {
 
   }
 
+  test("testListWithKeyCreation") {
+    val expected = List(("a", 1), ("a", 2))
+    val set1 = new NElementsSet[Int](2, Ordering.Int)
+    set1 += 1
+    set1 += 2
+
+    val actual = set1.listWithKey("a")
+    assert(actual === expected)
+  }
+
 }

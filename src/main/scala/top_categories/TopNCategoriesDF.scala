@@ -1,14 +1,16 @@
 package top_categories
 
-import org.apache.spark.{SparkConf, SparkContext, SparkFiles}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.desc
 import org.apache.spark.sql.hive.HiveContext
-import utils.{DBOutputWriter, InputProcessor}
+import org.apache.spark.{SparkConf, SparkContext}
+import utils.{DBOutputWriter, InputProcessor, SchemaManager}
 
 class TopNCategoriesDF(private val hiveContext : HiveContext) {
   def calculateUsingDF(inputFile: String, n: Int): DataFrame = {
-    new InputProcessor(hiveContext).createEventsDF(inputFile).
+    val inputProcessor = new InputProcessor(hiveContext.sparkContext)
+    val schemaManager = new SchemaManager(hiveContext, inputProcessor)
+    schemaManager.createEventsDF(inputFile).
       groupBy("category").
       count().
       sort(desc("count")).

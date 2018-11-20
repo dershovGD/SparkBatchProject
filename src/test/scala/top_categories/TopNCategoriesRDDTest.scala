@@ -5,10 +5,9 @@ import org.scalatest.FunSuite
 
 class TopNCategoriesRDDTest extends FunSuite {
   private val hiveContext = TestHive
-  private val sc = hiveContext.sparkContext
 
   test("testRDDCalculation") {
-    val expected = Array (("ZXF", 8), ("KMC", 4), ("bWD", 4))
+    val expected = Array (("ZXF", 8L), ("KMC", 4L), ("bWD", 4L))
 
     val actual = new TopNCategoriesRDD(hiveContext).calculateUsingRDD("src/test/resources/topCategories", 3)
 

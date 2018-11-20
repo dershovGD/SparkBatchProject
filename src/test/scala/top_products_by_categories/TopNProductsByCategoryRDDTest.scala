@@ -8,14 +8,16 @@ class TopNProductsByCategoryRDDTest extends FunSuite {
   private val sc = hiveContext.sparkContext
 
   test("testRDDCalculation") {
-    val devices = List(("mouse",6), ("monitor",10), ("iphone",11))
-    val toys = List(("teddyBear",5))
-    val autos = List(("citroen",3), ("peugeot",5), ("reno",4))
+    val devices = List(("mouse",6L), ("monitor",10L), ("iphone",11L))
+    val toys = List(("teddyBear",5L))
+    val autos = List(("citroen",3L), ("peugeot",5L), ("reno",4L))
 
-    val expected = Array(("device", devices), ("toy", toys), ("auto", autos))
+    val expected = Array(("device", "mouse" ,6L), ("device", "monitor", 10L), ("device", "iphone", 11L),
+      ("toy", "teddyBear", 5L),
+      ("auto", "citroen", 3L), ("auto", "peugeot", 5L), ("auto", "reno", 4L))
 
     val actualRDD = new TopNProductsByCategoryRDD(hiveContext).calculateUsingRDD("src/test/resources/topProductsByCategories.csv", 3)
-    val actualArray = actualRDD.mapValues(_.toList).collect()
+    val actualArray = actualRDD.collect()
     assert (actualArray === expected)
 
   }
