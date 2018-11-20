@@ -50,8 +50,8 @@ class SchemaManager(private val hiveContext: HiveContext) {
       add(StructField("product_name", StringType, nullable = true)).
       add(StructField("count", LongType, nullable = false))
 
-    val rows = topProductsByCategories.map(t => Row(t._1, t._2, t._3)).collect()
-    hiveContext.createDataFrame(rows.toSeq, schema)
+    val rows = topProductsByCategories.map(t => Row(t._1, t._2, t._3))
+    hiveContext.createDataFrame(rows, schema)
   }
 
   def createTopSpendingCountriesDF(topSpendingCountries: Array[(String, BigDecimal)]): DataFrame = {
