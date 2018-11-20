@@ -3,7 +3,7 @@ package top_categories
 import org.apache.spark.sql.hive.HiveContext
 import utils.InputProcessor
 
-class TopNCategoriesRDD(private val hiveContext : HiveContext) {
+class TopNCategoriesRDD(private val hiveContext: HiveContext) {
   def calculateUsingRDD(inputFile: String, n: Int): Array[(String, Int)] = {
     new InputProcessor(hiveContext.sparkContext).readFromFile(inputFile).
       map(line => (line(3), 1)).

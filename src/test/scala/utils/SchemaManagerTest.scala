@@ -1,11 +1,9 @@
 package utils
 
-import java.util.Comparator
-
-import org.apache.spark.sql.Row
 import org.apache.spark.sql.hive.test.TestHive
 import org.apache.spark.sql.types.{LongType, StringType, StructField, StructType}
 import org.scalatest.FunSuite
+import org.scalatest.Matchers._
 
 class SchemaManagerTest extends FunSuite {
 
@@ -24,6 +22,8 @@ class SchemaManagerTest extends FunSuite {
 
     val actualDF = new SchemaManager(TestHive, new InputProcessor(TestHive.sparkContext)).
       createTopProductsByCategoriesDF(rdd)
+    assert(actualDF.schema === schema)
+    actualDF.collect() should contain theSameElementsAs expectedData
   }
 
 }

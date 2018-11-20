@@ -4,7 +4,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.hive.HiveContext
 import utils.{InputProcessor, NElementsSet}
 
-class TopNProductsByCategoryRDD(private val hiveContext : HiveContext) {
+class TopNProductsByCategoryRDD(private val hiveContext: HiveContext) {
   def calculateUsingRDD(inputFile: String, n: Int): RDD[(String, String, Long)] = {
     //Create a SparkContext to initialize Spark
 

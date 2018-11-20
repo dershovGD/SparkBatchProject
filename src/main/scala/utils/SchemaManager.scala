@@ -10,7 +10,7 @@ import org.apache.spark.sql.types._
 import collection.JavaConversions._
 
 class SchemaManager(private val hiveContext: HiveContext, private val inputProcessor: InputProcessor) {
-  def createEventsDF(inputFile: String) : DataFrame = {
+  def createEventsDF(inputFile: String): DataFrame = {
     val schema = new StructType().
       add(StructField("product_name", StringType, nullable = true)).
       add(StructField("product_price", DecimalType(38, 12), nullable = true)).
@@ -24,7 +24,7 @@ class SchemaManager(private val hiveContext: HiveContext, private val inputProce
     hiveContext.createDataFrame(rows, schema)
   }
 
-  def createCountriesDF(inputFile: String) : DataFrame = {
+  def createCountriesDF(inputFile: String): DataFrame = {
     val schema = new StructType().
       add(StructField("network", StringType, nullable = true)).
       add(StructField("country_iso_code", StringType, nullable = true)).
@@ -36,7 +36,7 @@ class SchemaManager(private val hiveContext: HiveContext, private val inputProce
     hiveContext.createDataFrame(rows, schema)
   }
 
-  def createTopCategoriesDF(topCategories : Array[(String, Long)]) : DataFrame = {
+  def createTopCategoriesDF(topCategories: Array[(String, Long)]): DataFrame = {
     val schema: StructType = new StructType().
       add(StructField("category", StringType, nullable = true)).
       add(StructField("count", LongType, nullable = false))
@@ -44,14 +44,22 @@ class SchemaManager(private val hiveContext: HiveContext, private val inputProce
     hiveContext.createDataFrame(rows.toSeq, schema)
   }
 
-  def createTopProductsByCategoriesDF(topProductsByCategories: RDD[(String, String, Long)]) : DataFrame = {
+  def createTopProductsByCategoriesDF(topProductsByCategories: RDD[(String, String, Long)]): DataFrame = {
     val schema = new StructType().
       add(StructField("category", StringType, nullable = true)).
       add(StructField("product_name", StringType, nullable = true)).
       add(StructField("count", LongType, nullable = false))
 
-      val rows = topProductsByCategories.map(t => Row(t._1, t._2, t._3)).collect()
-      hiveContext.createDataFrame(rows.toSeq, schema)
+    val rows = topProductsByCategories.map(t => Row(t._1, t._2, t._3)).collect()
+    hiveContext.createDataFrame(rows.toSeq, schema)
   }
 
+  def createTopSpendingCountriesDF(topSpendingCountries: Array[(String, BigDecimal)]): DataFrame = {
+    val schema = new StructType().
+      add(StructField("country_name", StringType, nullable = true)).
+      add(StructField("total_purchases", DecimalType(38, 12), nullable = true))
+
+    val rows = topSpendingCountries.map(Row(_))
+    hiveContext.createDataFrame(rows.toSeq, schema)
+  }
 }

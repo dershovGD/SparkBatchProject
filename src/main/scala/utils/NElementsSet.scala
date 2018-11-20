@@ -26,7 +26,7 @@ class NElementsSet[T](private val n: Int, private val comparator: Comparator[T])
     new util.ArrayList[T](queue).asScala.toList
   }
 
-  def listWithKey[K](key : K) : List[(K, T)] = {
+  def listWithKey[K](key: K): List[(K, T)] = {
     toList.map((key, _))
   }
 
