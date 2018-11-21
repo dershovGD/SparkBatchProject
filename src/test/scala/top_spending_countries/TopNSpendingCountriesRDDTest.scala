@@ -8,8 +8,8 @@ class TopNSpendingCountriesRDDTest extends FunSuite {
   private val sc = hiveContext.sparkContext
 
   test("testRDDCalculation") {
-    val expected = Array (("England", BigDecimal("1249.54442975586234521045980727649293839931488037109375")),
-      ("Russia", BigDecimal("1169.4425687337158166201334097422659397125244140625")),
+    val expected = Array (("England", BigDecimal("1243")),
+      ("Russia", BigDecimal("1165.8")),
       ("Austria", BigDecimal("9")))
 
     val actual = new TopNSpendingCountriesRDD(hiveContext).calculateUsingRDD(

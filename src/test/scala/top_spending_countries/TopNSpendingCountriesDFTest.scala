@@ -15,8 +15,8 @@ class TopNSpendingCountriesDFTest extends FunSuite {
       add(StructField("country_name", StringType, nullable = true)).
       add(StructField("total_purchases", DecimalType(38,12), nullable = true))
     val expectedData = Seq(
-      Row("England", BigDecimal("1249.544429755863")),
-      Row("Russia", BigDecimal("1169.442568733716")),
+      Row("England", BigDecimal("1243")),
+      Row("Russia", BigDecimal("1165.8")),
       Row("Austria", BigDecimal("9.000000000000")))
     val expectedDF = hiveContext.createDataFrame(sc.parallelize(expectedData), expectedSchema)
 
