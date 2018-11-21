@@ -28,7 +28,6 @@ class TopNSpendingCountriesDF(private val hiveContext: HiveContext) extends Calc
 }
 object TopNSpendingCountriesDF {
   def main(args: Array[String]): Unit = {
-    println("LALALA " + args.length)
     val conf = new SparkConf()
       .setMaster("local")
       .setAppName("TopNSpendingCountriesDF")
