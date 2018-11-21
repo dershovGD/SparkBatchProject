@@ -8,7 +8,7 @@ import scala.collection.JavaConverters._
 
 
 class NElementsSet[T](private val n: Int, private val comparator: Comparator[T]) extends Serializable {
-  private val queue = new PriorityQueue[T](comparator)
+  private val queue = new PriorityQueue[T](n, comparator)
 
   def +=(elem: T): NElementsSet[T] = {
     if (queue.size < n) {

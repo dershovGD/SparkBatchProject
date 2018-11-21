@@ -1,10 +1,12 @@
 package top_products_by_categories
 
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.hive.HiveContext
-import utils.{InputProcessor, NElementsSet}
+import utils._
 
-class TopNProductsByCategoryRDD(private val hiveContext: HiveContext) {
+class TopNProductsByCategoryRDD(private val hiveContext: HiveContext) extends Calculator{
   def calculateUsingRDD(inputFile: String, n: Int): RDD[(String, String, Long)] = {
     //Create a SparkContext to initialize Spark
 
@@ -16,6 +18,24 @@ class TopNProductsByCategoryRDD(private val hiveContext: HiveContext) {
         (set1, set2) => set1 ++= set2).
       flatMap(tuple => tuple._2.listWithKey(tuple._1))
       .map(e => (e._1, e._2._1, e._2._2))
+  }
+
+  override def calculate(args: Array[String], n: Int): DataFrame = {
+    val rdd = calculateUsingRDD(args(0), n)
+    new SchemaManager(hiveContext).createTopProductsByCategoriesDF(rdd)
+  }
+}
+
+object TopNProductsByCategoryRDD {
+  def main(args: Array[String]): Unit = {
+    val conf = new SparkConf()
+      .setMaster("local[3]")
+      .setAppName("TopNProductsByCategoryRDD")
+      .set("spark.mapreduce.input.fileinputformat.input.dir.recursive", "true")
+    val sc = new SparkContext(conf)
+    val calculator = new TopNProductsByCategoryRDD(new HiveContext(sc))
+
+    Runner.run("spark_top_products_by_categories_rdd", calculator, args, 10)
   }
 
 }
