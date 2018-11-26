@@ -1,7 +1,9 @@
 package utils
 
+import java.io.{BufferedReader, FileReader}
+
 import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{SparkConf, SparkContext, SparkFiles}
 
 object Runner {
   def run(appName:String, calculator: Calculator, n: Int) :Unit = {
@@ -18,10 +20,9 @@ object Runner {
     val dataFrame = calculator.calculate(hiveContext, n)
 
     val prop = new java.util.Properties
-    prop.setProperty("driver", "com.mysql.jdbc.Driver")
-    prop.setProperty("user", "root")
-    prop.setProperty("password", "cloudera")
-    val url = "jdbc:mysql://localhost:3306/hadoop"
+    val reader = new BufferedReader(new FileReader(SparkFiles.get("properties.conf")))
+    prop.load(reader)
+    val url = prop.getProperty("url")
     new DBOutputWriter(prop, url, appName).writeDataFrame(dataFrame)
   }
 
