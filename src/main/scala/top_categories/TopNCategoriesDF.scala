@@ -27,7 +27,10 @@ object TopNCategoriesDF {
       .setMaster("local[3]")
       .setAppName("TopNCategoriesDF")
       .set("spark.mapreduce.input.fileinputformat.input.dir.recursive", "true")
+      .set("spark.hadoop.mapreduce.input.fileinputformat.input.dir.recursive","true")
     val sc = new SparkContext(conf)
+    val hadoopConf = sc.hadoopConfiguration
+    hadoopConf.set("mapreduce.input.fileinputformat.input.dir.recursive", "true")
     val calculator = new TopNCategoriesDF(new HiveContext(sc))
 
     Runner.run("spark_top_categories_df", calculator, args, 10)
