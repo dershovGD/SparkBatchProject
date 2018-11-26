@@ -13,18 +13,19 @@ class TopNSpendingCountriesDFTest extends FunSuite {
   test("testDFCalculation") {
     val expectedSchema = new StructType().
       add(StructField("country_name", StringType, nullable = true)).
-      add(StructField("total_purchases", DecimalType(38,12), nullable = true))
+      add(StructField("total_purchases", DecimalType(38, 12), nullable = true))
     val expectedData = Seq(
       Row("England", BigDecimal("1243")),
       Row("Russia", BigDecimal("1165.8")),
       Row("Austria", BigDecimal("9.000000000000")))
     val expectedDF = hiveContext.createDataFrame(sc.parallelize(expectedData), expectedSchema)
 
-    val actualDF = new TopNSpendingCountriesDF(hiveContext).calculateUsingDF(
-      "src/test/resources/topProductsByCategories.csv",
-      "src/test/resources/countries_ip.csv", 3)
+    val inputFiles = Array("src/test/resources/topProductsByCategories.csv",
+      "src/test/resources/countries_ip.csv")
+
+    val actualDF = new TopNSpendingCountriesDF(inputFiles).calculateUsingDF(hiveContext, 3)
     assert(actualDF.schema === expectedSchema)
-    actualDF.collect() should contain theSameElementsAs  expectedDF.collect()
+    actualDF.collect() should contain theSameElementsAs expectedDF.collect()
   }
 
 }

@@ -5,7 +5,6 @@ import org.scalatest.FunSuite
 
 class TopNProductsByCategoryRDDTest extends FunSuite {
   private val hiveContext = TestHive
-  private val sc = hiveContext.sparkContext
 
   test("testRDDCalculation") {
     val devices = List(("mouse",6L), ("monitor",10L), ("iphone",11L))
@@ -16,7 +15,10 @@ class TopNProductsByCategoryRDDTest extends FunSuite {
       ("toy", "teddyBear", 5L),
       ("auto", "citroen", 3L), ("auto", "peugeot", 5L), ("auto", "reno", 4L))
 
-    val actualRDD = new TopNProductsByCategoryRDD(hiveContext).calculateUsingRDD("src/test/resources/topProductsByCategories.csv", 3)
+    val inputFiles = Array("src/test/resources/topProductsByCategories.csv")
+
+
+    val actualRDD = new TopNProductsByCategoryRDD(inputFiles).calculateUsingRDD(hiveContext, 3)
     val actualArray = actualRDD.collect()
     assert (actualArray === expected)
 

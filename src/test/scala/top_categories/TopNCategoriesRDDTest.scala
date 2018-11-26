@@ -8,8 +8,9 @@ class TopNCategoriesRDDTest extends FunSuite {
 
   test("testRDDCalculation") {
     val expected = Array (("ZXF", 8L), ("KMC", 4L), ("bWD", 4L))
+    val inputFiles = Array("src/test/resources/topCategories")
 
-    val actual = new TopNCategoriesRDD(hiveContext).calculateUsingRDD("src/test/resources/topCategories", 3)
+    val actual = new TopNCategoriesRDD(inputFiles).calculateUsingRDD(hiveContext, 3)
 
     assert(actual === expected)
   }

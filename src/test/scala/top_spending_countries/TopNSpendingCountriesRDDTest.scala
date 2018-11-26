@@ -12,9 +12,10 @@ class TopNSpendingCountriesRDDTest extends FunSuite {
       ("Russia", BigDecimal("1165.8")),
       ("Austria", BigDecimal("9")))
 
-    val actual = new TopNSpendingCountriesRDD(hiveContext).calculateUsingRDD(
-      "src/test/resources/topProductsByCategories.csv",
-      "src/test/resources/countries_ip.csv", 3)
+    val inputFiles = Array("src/test/resources/topProductsByCategories.csv",
+      "src/test/resources/countries_ip.csv")
+
+    val actual = new TopNSpendingCountriesRDD(inputFiles).calculateUsingRDD(hiveContext, 3)
 
     assert(actual === expected)
   }

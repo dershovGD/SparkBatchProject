@@ -1,8 +1,9 @@
 package utils
 
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.hive.HiveContext
 
 trait Calculator {
-  def calculate(args: Array[String], n:Int) : DataFrame
+  def calculate(hiveContext: HiveContext, n:Int) : DataFrame
 
 }

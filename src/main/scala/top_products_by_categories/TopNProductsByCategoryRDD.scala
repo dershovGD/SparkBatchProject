@@ -6,11 +6,12 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.hive.HiveContext
 import utils._
 
-class TopNProductsByCategoryRDD(private val hiveContext: HiveContext) extends Calculator{
-  def calculateUsingRDD(inputFile: String, n: Int): RDD[(String, String, Long)] = {
+class TopNProductsByCategoryRDD(private val inputFiles: Array[String]) extends Calculator{
+  val eventsFile = inputFiles(0)
+  def calculateUsingRDD(hiveContext: HiveContext, n: Int): RDD[(String, String, Long)] = {
     //Create a SparkContext to initialize Spark
 
-    val data = new InputProcessor(hiveContext.sparkContext).readFromFile(inputFile)
+    val data = new InputProcessor(hiveContext.sparkContext).readFromFile(eventsFile)
     data.map(line => (Tuple2(line(3), line(0)), 1L)).
       reduceByKey(_ + _).
       map(record => (record._1._1, Tuple2(record._1._2, record._2))).
@@ -20,22 +21,16 @@ class TopNProductsByCategoryRDD(private val hiveContext: HiveContext) extends Ca
       .map(e => (e._1, e._2._1, e._2._2))
   }
 
-  override def calculate(args: Array[String], n: Int): DataFrame = {
-    val rdd = calculateUsingRDD(args(0), n)
+  override def calculate(hiveContext: HiveContext, n: Int): DataFrame = {
+    val rdd = calculateUsingRDD(hiveContext, n)
     new SchemaManager(hiveContext).createTopProductsByCategoriesDF(rdd)
   }
 }
 
 object TopNProductsByCategoryRDD {
   def main(args: Array[String]): Unit = {
-    val conf = new SparkConf()
-      .setMaster("local[3]")
-      .setAppName("TopNProductsByCategoryRDD")
-      .set("spark.mapreduce.input.fileinputformat.input.dir.recursive", "true")
-    val sc = new SparkContext(conf)
-    val calculator = new TopNProductsByCategoryRDD(new HiveContext(sc))
-
-    Runner.run("spark_top_products_by_categories_rdd", calculator, args, 10)
+    val calculator = new TopNProductsByCategoryRDD(args)
+    Runner.run("spark_top_products_by_categories_rdd", calculator, 10)
   }
 
 }
