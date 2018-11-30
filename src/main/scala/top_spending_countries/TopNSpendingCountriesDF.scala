@@ -12,7 +12,7 @@ class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Cal
   def   calculateUsingDF(hiveContext: HiveContext, n: Int): DataFrame = {
     val schemaManager = new SchemaManager(hiveContext)
     val isInRange = udf((network: String, ip: String) => new SubnetUtils(network).getInfo.isInRange(ip))
-    val events = schemaManager.createEventsDF(inputPurchases) //n*logn
+    val events = schemaManager.createEventsDF(inputPurchases) 
     val countries = schemaManager.createCountriesDF(inputCountries) //m*logm
 
     events.join(broadcast(countries), isInRange(countries("network"), events("ip_address"))). //n*m

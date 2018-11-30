@@ -4,7 +4,7 @@ import org.apache.commons.net.util.SubnetUtils
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.hive.HiveContext
-import utils.{Calculator, InputProcessor, Runner, SchemaManager}
+import utils._
 
 class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Calculator{
   val inputPurchases = inputFiles(0)
@@ -14,13 +14,20 @@ class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Ca
     val processor = new InputProcessor(hiveContext.sparkContext)
     val purchases = processor.readEvents(inputPurchases).
       map(event => (event.ipAddress, event.productPrice)).
-      reduceByKey(_ + _)
-    val countries_ip = processor.readCountries(inputCountries).
-      map(country => (country.network, country.countryName))
+      reduceByKey(_ + _).
+      map(r => TotalPurchasesIp(r._1, r._2))
+    val networkCountries = processor.
+      readCountries(inputCountries).
+      map(country => NetworkCountry(country.network, country.countryName))
+    val countriesIpBroadcasted = hiveContext.sparkContext.broadcast(networkCountries)
 
-    purchases.cartesian(countries_ip).
-      filter(record => new SubnetUtils(record._2._1).getInfo.isInRange(record._1._1)).
-      map(record => (record._2._2, record._1._2)).
+
+    purchases.map(entry => TotalPurchasesCountry(
+      new CountryByIpFinder(countriesIpBroadcasted.value).findCountryByIp(entry.ipAddress).orNull,
+      entry.totalPurchases)).
+      filter(r => r.country != null).
+      keyBy(_.country).
+      mapValues(_.totalPurchases).
       reduceByKey(_ + _).
       sortBy(_._2, ascending = false).
       take(n)
@@ -31,6 +38,9 @@ class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Ca
     new SchemaManager(hiveContext).createTopSpendingCountriesDF(array)
   }
 }
+
+case class TotalPurchasesIp(ipAddress: String, totalPurchases: BigDecimal)
+case class TotalPurchasesCountry(country: String, totalPurchases: BigDecimal)
 
 object TopNSpendingCountriesRDD {
   def main(args: Array[String]): Unit = {

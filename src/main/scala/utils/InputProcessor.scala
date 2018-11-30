@@ -4,6 +4,7 @@ import java.sql.Timestamp
 
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
+import scala.io.Source._
 
 class InputProcessor(private val sc: SparkContext) {
 
@@ -15,12 +16,12 @@ class InputProcessor(private val sc: SparkContext) {
       .map(Event)
   }
 
-  def readCountries(inputFile: String) : RDD[Country] = {
+  def readCountries(inputFile: String) : Array[Country]= {
     val separator = ","
 
-    sc.textFile(inputFile)
-      .map(line => line.split(separator))
-      .map(Country)
+    val lines = fromFile(inputFile).getLines
+    lines.toArray.
+      map(line => Country(line.split(separator)))
   }
 
 }

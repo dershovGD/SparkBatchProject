@@ -35,7 +35,7 @@ class SchemaManager(private val hiveContext: HiveContext) {
     //val stringsToRow: Array[String] => Row = t => Row(t(0), t(1), t(2))
     val rows = new InputProcessor(hiveContext.sparkContext).
       readCountries(inputFile).
-      map(country => Row(country.network, country.countryIsoCode, country.countryName))
+      map(country => Row(country.network, country.countryIsoCode, country.countryName)).toSeq
 
     hiveContext.createDataFrame(rows, schema)
   }
