@@ -19,8 +19,7 @@ class TopNProductsByCategoryDF(private val inputFiles: Array[String]) extends Ca
     val dataFrame = schemaManager.createEventsDF(eventsFile).
       groupBy("category", "product_name").
       count().
-      withColumn("row_number", row_number() over windowSpec).
-      cache()
+      withColumn("row_number", row_number() over windowSpec)
     dataFrame.filter(dataFrame("row_number") < n)
 
   }

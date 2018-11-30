@@ -5,6 +5,8 @@ import org.apache.spark.sql.hive.test.TestHive
 import org.apache.spark.sql.types.{LongType, StringType, StructField, StructType}
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
+import top_categories.CategoryCount
+import top_products_by_categories.CategoryProductCount
 
 class SchemaManagerTest extends FunSuite {
 
@@ -16,16 +18,17 @@ class SchemaManagerTest extends FunSuite {
 
 
     val expectedData = Array(
-      ("auto", "peugeot", 5L),
-      ("device", "iphone", 11L),
-      ("toy", "teddyBear", 5L))
+      CategoryProductCount("auto", "peugeot", 5L),
+      CategoryProductCount("device", "iphone", 11L),
+      CategoryProductCount("toy", "teddyBear", 5L))
     val rdd = TestHive.sparkContext.parallelize(expectedData)
 
     val actualDF = new SchemaManager(TestHive).
       createTopProductsByCategoriesDF(rdd)
     assert(actualDF.schema === schema)
     assert(actualDF.count == 3)
-    actualDF.collect() should contain theSameElementsAs expectedData.map(e => Row(e._1, e._2, e._3))
+    actualDF.collect() should contain theSameElementsAs expectedData.
+      map(t => Row(t.category, t.productName, t.count))
   }
 
   test("testCreateTopCategoriesDF") {
@@ -35,15 +38,15 @@ class SchemaManagerTest extends FunSuite {
 
 
     val expectedData = Array(
-      ("auto", 5L),
-      ("device", 11L),
-      ("toy", 5L))
+      CategoryCount("auto", 5L),
+      CategoryCount("device", 11L),
+      CategoryCount("toy", 5L))
 
     val actualDF = new SchemaManager(TestHive).
       createTopCategoriesDF(expectedData)
     assert(actualDF.schema === schema)
     assert(actualDF.count == 3)
-    actualDF.collect() should contain theSameElementsAs expectedData.map(e => Row(e._1, e._2))
+    actualDF.collect() should contain theSameElementsAs expectedData.map(r => Row(r.category, r.count))
   }
 
 }

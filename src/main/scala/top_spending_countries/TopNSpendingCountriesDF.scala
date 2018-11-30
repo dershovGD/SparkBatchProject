@@ -2,9 +2,8 @@ package top_spending_countries
 
 import org.apache.commons.net.util.SubnetUtils
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.{desc, udf}
+import org.apache.spark.sql.functions.{broadcast, desc, udf}
 import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.{SparkConf, SparkContext}
 import utils.{Calculator, Runner, SchemaManager}
 
 class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Calculator{
@@ -13,15 +12,19 @@ class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Cal
   def   calculateUsingDF(hiveContext: HiveContext, n: Int): DataFrame = {
     val schemaManager = new SchemaManager(hiveContext)
     val isInRange = udf((network: String, ip: String) => new SubnetUtils(network).getInfo.isInRange(ip))
-    val events = schemaManager.createEventsDF(inputPurchases).
-      cache()
-    val countries = schemaManager.createCountriesDF(inputCountries).cache()
-    events.join(countries, isInRange(countries("network"), events("ip_address"))).
+    val events = schemaManager.createEventsDF(inputPurchases) //n*logn
+    val countries = schemaManager.createCountriesDF(inputCountries) //m*logm
+
+    events.join(broadcast(countries), isInRange(countries("network"), events("ip_address"))). //n*m
       groupBy("country_name").
       sum("product_price").
       withColumnRenamed("sum(product_price)", "total_purchases").
       sort(desc("total_purchases")).
       limit(n)
+      //(ipmin1, ipmax1) => (nmin1<ipmin1, nmax1> ipmax1)
+      //countries broadcast
+      //(ipmin, ipmax, country)
+
   }
 
   override def calculate(hiveContext: HiveContext, n: Int): DataFrame = {

@@ -7,11 +7,12 @@ import utils.{Calculator, InputProcessor, Runner, SchemaManager}
 
 class TopNCategoriesRDD(private val inputFiles: Array[String]) extends Calculator{
   val eventsFile = inputFiles(0)
-  def calculateUsingRDD(hiveContext: HiveContext, n: Int): Array[(String, Long)] = {
-    new InputProcessor(hiveContext.sparkContext).readFromFile(eventsFile).
-      map(line => (line(3), 1L)).
+  def calculateUsingRDD(hiveContext: HiveContext, n: Int): Array[CategoryCount] = {
+    new InputProcessor(hiveContext.sparkContext).readEvents(eventsFile).
+      map(event => (event.category, 1L)).
       reduceByKey(_ + _).
-      sortBy(_._2, ascending = false).
+      map(r => CategoryCount(r._1, r._2)).
+      sortBy(_.count, ascending = false).
       take(n)
 
   }
@@ -21,6 +22,8 @@ class TopNCategoriesRDD(private val inputFiles: Array[String]) extends Calculato
     new SchemaManager(hiveContext).createTopCategoriesDF(array)
   }
 }
+
+case class CategoryCount(category:String, count: Long)
 
 object TopNCategoriesRDD {
   def main(args: Array[String]): Unit = {

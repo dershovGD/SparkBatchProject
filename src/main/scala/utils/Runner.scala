@@ -1,9 +1,7 @@
 package utils
 
-import java.io.{BufferedReader, FileReader}
-
 import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.{SparkConf, SparkContext, SparkFiles}
+import org.apache.spark.{SparkConf, SparkContext}
 
 object Runner {
   def run(appName:String, calculator: Calculator, n: Int) :Unit = {
@@ -20,9 +18,8 @@ object Runner {
     val dataFrame = calculator.calculate(hiveContext, n)
 
     val prop = new java.util.Properties
-    val reader = new BufferedReader(new FileReader(SparkFiles.get("properties.conf")))
-    prop.load(reader)
-    val url = prop.getProperty("url")
+    prop.setProperty("driver", "com.mysql.jdbc.Driver")
+    val url = "jdbc:mysql://10.0.0.21:3306/dershov"
     new DBOutputWriter(prop, url, appName).writeDataFrame(dataFrame)
   }
 

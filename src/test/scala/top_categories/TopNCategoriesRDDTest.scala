@@ -7,7 +7,10 @@ class TopNCategoriesRDDTest extends FunSuite {
   private val hiveContext = TestHive
 
   test("testRDDCalculation") {
-    val expected = Array (("ZXF", 8L), ("KMC", 4L), ("bWD", 4L))
+    val expected = Array (
+      CategoryCount("ZXF", 8L),
+      CategoryCount("KMC", 4L),
+      CategoryCount("bWD", 4L))
     val inputFiles = Array("src/test/resources/topCategories")
 
     val actual = new TopNCategoriesRDD(inputFiles).calculateUsingRDD(hiveContext, 3)
