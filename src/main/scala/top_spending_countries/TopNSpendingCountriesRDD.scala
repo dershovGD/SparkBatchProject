@@ -1,16 +1,14 @@
 package top_spending_countries
 
-import org.apache.commons.net.util.SubnetUtils
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.hive.HiveContext
 import utils._
 
-class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Calculator{
+class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Calculator {
   val inputPurchases = inputFiles(0)
   val inputCountries = inputFiles(1)
 
-  def calculateUsingRDD(hiveContext: HiveContext,  n: Int): Array[(String, BigDecimal)] = {
+  def calculateUsingRDD(hiveContext: HiveContext, n: Int): Array[(String, BigDecimal)] = {
     val processor = new InputProcessor(hiveContext.sparkContext)
     val purchases = processor.readEvents(inputPurchases).
       map(event => (event.ipAddress, event.productPrice)).
@@ -19,11 +17,11 @@ class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Ca
     val networkCountries = processor.
       readCountries(inputCountries).
       map(country => NetworkCountry(country.network, country.countryName))
-    val countriesIpBroadcasted = hiveContext.sparkContext.broadcast(networkCountries)
+    val countriesIpBroadcast = hiveContext.sparkContext.broadcast(networkCountries)
 
 
     purchases.map(entry => TotalPurchasesCountry(
-      new CountryByIpFinder(countriesIpBroadcasted.value).findCountryByIp(entry.ipAddress).orNull,
+      new CountryByIpFinder(countriesIpBroadcast.value).findCountryByIp(entry.ipAddress).orNull,
       entry.totalPurchases)).
       filter(r => r.country != null).
       keyBy(_.country).
@@ -40,6 +38,7 @@ class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Ca
 }
 
 case class TotalPurchasesIp(ipAddress: String, totalPurchases: BigDecimal)
+
 case class TotalPurchasesCountry(country: String, totalPurchases: BigDecimal)
 
 object TopNSpendingCountriesRDD {

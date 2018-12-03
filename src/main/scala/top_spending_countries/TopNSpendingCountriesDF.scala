@@ -5,21 +5,23 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
 import utils._
 
-class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Calculator{
+class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Calculator {
   val inputPurchases = inputFiles(0)
   val inputCountries = inputFiles(1)
-  def   calculateUsingDF(hiveContext: HiveContext, n: Int): DataFrame = {
-    val schemaManager = new SchemaManager(hiveContext)
 
+  def calculateUsingDF(hiveContext: HiveContext, n: Int): DataFrame = {
+    val schemaManager = new SchemaManager(hiveContext)
     val events = schemaManager.createEventsDF(inputPurchases)
 
     val processor = new InputProcessor(hiveContext.sparkContext)
     val networkCountries = processor.
       readCountries(inputCountries).
       map(country => NetworkCountry(country.network, country.countryName))
-    val countriesIpBroadcasted = hiveContext.sparkContext.broadcast(networkCountries)
+
+    val countriesIpBroadcast = hiveContext.sparkContext.broadcast(networkCountries)
+
     val isInRange = udf((ip: String) => {
-      new CountryByIpFinder(countriesIpBroadcasted.value).findCountryByIp(ip).orNull
+      new CountryByIpFinder(countriesIpBroadcast.value).findCountryByIp(ip).orNull
     })
 
     events.withColumn("country_name", isInRange(events("ip_address"))).
@@ -35,6 +37,7 @@ class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Cal
     calculateUsingDF(hiveContext, n)
   }
 }
+
 object TopNSpendingCountriesDF {
   def main(args: Array[String]): Unit = {
     val calculator = new TopNSpendingCountriesDF(args)

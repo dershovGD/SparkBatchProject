@@ -5,11 +5,10 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.hive.HiveContext
 import utils._
 
-class TopNProductsByCategoryRDD(private val inputFiles: Array[String]) extends Calculator{
+class TopNProductsByCategoryRDD(private val inputFiles: Array[String]) extends Calculator {
   val eventsFile = inputFiles(0)
-  def calculateUsingRDD(hiveContext: HiveContext, n: Int): RDD[CategoryProductCount] = {
-    //Create a SparkContext to initialize Spark
 
+  def calculateUsingRDD(hiveContext: HiveContext, n: Int): RDD[CategoryProductCount] = {
     val data = new InputProcessor(hiveContext.sparkContext).readEvents(eventsFile)
     data.map(event => CategoryProductCount(event.category, event.productName, 1L)).
       keyBy(record => (record.category, record.productName)).
@@ -30,8 +29,9 @@ class TopNProductsByCategoryRDD(private val inputFiles: Array[String]) extends C
   }
 }
 
-case class CategoryProductCount(category: String, productName: String, count : Long)
-case class ProductCount(productName :String, count: Long)
+case class CategoryProductCount(category: String, productName: String, count: Long)
+
+case class ProductCount(productName: String, count: Long)
 
 object TopNProductsByCategoryRDD {
   def main(args: Array[String]): Unit = {

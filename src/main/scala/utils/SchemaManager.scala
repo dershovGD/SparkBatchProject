@@ -18,24 +18,9 @@ class SchemaManager(private val hiveContext: HiveContext) {
       add(StructField("category", StringType, nullable = true)).
       add(StructField("ip_address", StringType, nullable = true))
 
-    //val stringsToRow: Array[String] => Row = t => Row(t(0), BigDecimal(t(1)), Timestamp.valueOf(t(2)), t(3), t(4))
     val rows = new InputProcessor(hiveContext.sparkContext).
       readEvents(inputFile).
       map(event => Row(event.productName, event.productPrice, event.purchaseDate, event.category, event.ipAddress))
-
-    hiveContext.createDataFrame(rows, schema)
-  }
-
-  def createCountriesDF(inputFile: String): DataFrame = {
-    val schema = new StructType().
-      add(StructField("network", StringType, nullable = true)).
-      add(StructField("country_iso_code", StringType, nullable = true)).
-      add(StructField("country_name", StringType, nullable = true))
-
-    //val stringsToRow: Array[String] => Row = t => Row(t(0), t(1), t(2))
-    val rows = new InputProcessor(hiveContext.sparkContext).
-      readCountries(inputFile).
-      map(country => Row(country.network, country.countryIsoCode, country.countryName)).toSeq
 
     hiveContext.createDataFrame(rows, schema)
   }

@@ -37,6 +37,6 @@ class NElementsSet[T](private val n: Int, private val comparator: Comparator[T])
     this
   }
 
-  override def toString = queue.toString
+  override def toString: String = queue.toString
 
 }

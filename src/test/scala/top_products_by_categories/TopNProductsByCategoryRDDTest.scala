@@ -8,7 +8,7 @@ class TopNProductsByCategoryRDDTest extends FunSuite {
 
   test("testRDDCalculation") {
     val expected = Array(
-      CategoryProductCount("device", "mouse" ,6L),
+      CategoryProductCount("device", "mouse", 6L),
       CategoryProductCount("device", "monitor", 10L),
       CategoryProductCount("device", "iphone", 11L),
       CategoryProductCount("toy", "teddyBear", 5L),
@@ -21,7 +21,7 @@ class TopNProductsByCategoryRDDTest extends FunSuite {
 
     val actualRDD = new TopNProductsByCategoryRDD(inputFiles).calculateUsingRDD(hiveContext, 3)
     val actualArray = actualRDD.collect()
-    assert (actualArray === expected)
+    assert(actualArray === expected)
 
   }
 

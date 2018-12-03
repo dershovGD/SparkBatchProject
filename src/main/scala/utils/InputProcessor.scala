@@ -4,6 +4,7 @@ import java.sql.Timestamp
 
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
+
 import scala.io.Source._
 
 class InputProcessor(private val sc: SparkContext) {
@@ -16,7 +17,7 @@ class InputProcessor(private val sc: SparkContext) {
       .map(Event)
   }
 
-  def readCountries(inputFile: String) : Array[Country]= {
+  def readCountries(inputFile: String): Array[Country] = {
     val separator = ","
 
     val lines = fromFile(inputFile).getLines
@@ -26,7 +27,7 @@ class InputProcessor(private val sc: SparkContext) {
 
 }
 
-case class Event(lines : Array[String]){
+case class Event(lines: Array[String]) {
   val productName = lines(0)
   val productPrice = BigDecimal(lines(1))
   val purchaseDate = Timestamp.valueOf(lines(2))
@@ -34,7 +35,7 @@ case class Event(lines : Array[String]){
   val ipAddress = lines(4)
 }
 
-case class Country(lines: Array[String]){
+case class Country(lines: Array[String]) {
   val network = lines(0)
   val countryIsoCode = lines(1)
   val countryName = lines(2)

@@ -24,7 +24,7 @@ class TopNCategoriesDFTest extends FunSuite {
 
     val actual = new TopNCategoriesDF(inputFiles).calculateUsingDF(hiveContext, 3)
     assert(actual.schema === expectedDF.schema)
-    actual.collect() should contain theSameElementsAs  expectedDF.collect()
+    actual.collect() should contain theSameElementsAs expectedDF.collect()
   }
 
 }

@@ -1,12 +1,12 @@
 package top_categories
 
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.hive.HiveContext
 import utils.{Calculator, InputProcessor, Runner, SchemaManager}
 
-class TopNCategoriesRDD(private val inputFiles: Array[String]) extends Calculator{
+class TopNCategoriesRDD(private val inputFiles: Array[String]) extends Calculator {
   val eventsFile = inputFiles(0)
+
   def calculateUsingRDD(hiveContext: HiveContext, n: Int): Array[CategoryCount] = {
     new InputProcessor(hiveContext.sparkContext).readEvents(eventsFile).
       map(event => (event.category, 1L)).
@@ -23,7 +23,7 @@ class TopNCategoriesRDD(private val inputFiles: Array[String]) extends Calculato
   }
 }
 
-case class CategoryCount(category:String, count: Long)
+case class CategoryCount(category: String, count: Long)
 
 object TopNCategoriesRDD {
   def main(args: Array[String]): Unit = {

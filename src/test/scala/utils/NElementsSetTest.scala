@@ -5,7 +5,7 @@ import org.scalatest.FunSuite
 class NElementsSetTest extends FunSuite {
 
   test("testAdd") {
-    val expected = Array(2,4)
+    val expected = Array(2, 4)
 
     val set = new NElementsSet[Int](2, Ordering.Int)
     set += 1
@@ -16,7 +16,7 @@ class NElementsSetTest extends FunSuite {
   }
 
   test("testMerge") {
-    val expected = Array(2,4)
+    val expected = Array(2, 4)
     val set1 = new NElementsSet[Int](2, Ordering.Int)
     val set2 = new NElementsSet[Int](3, Ordering.Int)
     set1 += 1

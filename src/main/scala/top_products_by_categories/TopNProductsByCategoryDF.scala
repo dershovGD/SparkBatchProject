@@ -4,11 +4,11 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{desc, row_number}
 import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.{SparkConf, SparkContext}
 import utils.{Calculator, Runner, SchemaManager}
 
-class TopNProductsByCategoryDF(private val inputFiles: Array[String]) extends Calculator{
+class TopNProductsByCategoryDF(private val inputFiles: Array[String]) extends Calculator {
   val eventsFile = inputFiles(0)
+
   def calculateUsingDF(hiveContext: HiveContext, n: Int): DataFrame = {
     val windowSpec = Window.
       partitionBy("category").
@@ -28,6 +28,7 @@ class TopNProductsByCategoryDF(private val inputFiles: Array[String]) extends Ca
     calculateUsingDF(hiveContext, n)
   }
 }
+
 object TopNProductsByCategoryDF {
   def main(args: Array[String]): Unit = {
     val calculator = new TopNProductsByCategoryDF(args)
