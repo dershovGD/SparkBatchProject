@@ -13,6 +13,7 @@ libraryDependencies += "commons-net" % "commons-net" % "3.6"
 libraryDependencies += "org.apache.spark" %% "spark-hive" % "1.6.0"
 libraryDependencies += "com.h2database" % "h2" % "1.4.192" % "test"
 libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.7"
+libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25"
 
 assemblyMergeStrategy in assembly := {
  case PathList("META-INF", xs @ _*) => MergeStrategy.discard

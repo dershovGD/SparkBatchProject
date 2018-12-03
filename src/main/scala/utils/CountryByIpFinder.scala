@@ -4,18 +4,18 @@ import java.io.Serializable
 
 import org.apache.commons.net.util.SubnetUtils
 
-object CountryByIpFinder extends Serializable {
+class CountryByIpFinder(private val countriesIp: Array[Country]) extends Serializable {
   private val comparator = (n1: LowHighIpCountry, n2: LowHighIpCountry) => {
     if (n1.highIp < n2.lowIp) false
     else true
   }
 
-  private val mapper = (nc: NetworkCountry) => {
+  private val mapper = (nc: Country) => {
     val info = new SubnetUtils(nc.network).getInfo
     LowHighIpCountry(
       ipToLong(info.getLowAddress),
       ipToLong(info.getHighAddress),
-      nc.country)
+      nc.countryName)
   }
 
   private def ipToLong(ip: String): Long = {
@@ -26,7 +26,7 @@ object CountryByIpFinder extends Serializable {
       256L * 256L * 256L * Integer.parseInt(parts(0))
   }
 
-  def findCountryByIp(countriesIp: Array[NetworkCountry], ip: String): Option[String] = {
+  def findCountryByIp(ip: String): Option[String] = {
     val lowHighIpCountries = countriesIp.map(mapper).sortWith(comparator)
     binarySearch(lowHighIpCountries, ip)
   }
@@ -44,7 +44,5 @@ object CountryByIpFinder extends Serializable {
     } else scala.None
   }
 }
-
-case class NetworkCountry(network: String, country: String)
 
 case class LowHighIpCountry(lowIp: Long, highIp: Long, country: String)

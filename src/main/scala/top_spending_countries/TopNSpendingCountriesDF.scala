@@ -3,11 +3,13 @@ package top_spending_countries
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
+import org.slf4j.{Logger, LoggerFactory}
 import utils._
 
 class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Calculator {
-  val inputPurchases = inputFiles(0)
-  val inputCountries = inputFiles(1)
+  private val inputPurchases = inputFiles(0)
+  private val inputCountries = inputFiles(1)
+  private val slf4jLogger = LoggerFactory.getLogger("TopNSpendingCountriesDF")
 
   def calculateUsingDF(hiveContext: HiveContext, n: Int): DataFrame = {
     val schemaManager = new SchemaManager(hiveContext)
@@ -15,16 +17,20 @@ class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Cal
 
     val processor = new InputProcessor(hiveContext.sparkContext)
     val networkCountries = processor.
-      readCountries(inputCountries).
-      map(country => NetworkCountry(country.network, country.countryName))
+      readCountries(inputCountries)
+    slf4jLogger.info("Events successfully read")
 
-    val countriesIpBroadcast = hiveContext.sparkContext.broadcast(networkCountries)
+    val finder = new CountryByIpFinder(networkCountries)
+    val finderBroadcast = hiveContext.sparkContext.broadcast(finder)
+    slf4jLogger.info("Countries broadcast created")
 
     val isInRange = udf((ip: String) => {
-      CountryByIpFinder.findCountryByIp(countriesIpBroadcast.value, ip).orNull
+      finderBroadcast.value.findCountryByIp(ip).orNull
     })
 
-    events.withColumn("country_name", isInRange(events("ip_address"))).
+    val joinedData = events.withColumn("country_name", isInRange(events("ip_address")))
+    slf4jLogger.info("Join successfully finished")
+    joinedData.
       filter(col("country_name").isNotNull).
       groupBy("country_name").
       sum("product_price").

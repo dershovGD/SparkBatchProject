@@ -2,11 +2,13 @@ package top_spending_countries
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.hive.HiveContext
+import org.slf4j.LoggerFactory
 import utils._
 
 class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Calculator {
   val inputPurchases = inputFiles(0)
   val inputCountries = inputFiles(1)
+  private val slf4jLogger = LoggerFactory.getLogger("TopNSpendingCountriesRDD")
 
   def calculateUsingRDD(hiveContext: HiveContext, n: Int): Array[(String, BigDecimal)] = {
     val processor = new InputProcessor(hiveContext.sparkContext)
@@ -14,14 +16,19 @@ class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Ca
       map(event => (event.ipAddress, event.productPrice)).
       reduceByKey(_ + _).
       map(r => TotalPurchasesIp(r._1, r._2))
+    slf4jLogger.info("Events successfully read")
     val networkCountries = processor.
-      readCountries(inputCountries).
-      map(country => NetworkCountry(country.network, country.countryName))
-    val countriesIpBroadcast = hiveContext.sparkContext.broadcast(networkCountries)
+      readCountries(inputCountries)
 
-    purchases.map(entry => TotalPurchasesCountry(
-      CountryByIpFinder.findCountryByIp(countriesIpBroadcast.value, entry.ipAddress).orNull,
-      entry.totalPurchases)).
+    val finder = new CountryByIpFinder(networkCountries)
+    val finderBroadcast = hiveContext.sparkContext.broadcast(finder)
+    slf4jLogger.info("Countries broadcast created")
+
+    val joinedData = purchases.map(entry => TotalPurchasesCountry(
+      finderBroadcast.value.findCountryByIp(entry.ipAddress).orNull,
+      entry.totalPurchases))
+    slf4jLogger.info("Join successfully finished")
+    joinedData.
       filter(r => r.country != null).
       keyBy(_.country).
       mapValues(_.totalPurchases).
