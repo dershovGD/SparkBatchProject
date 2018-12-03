@@ -21,7 +21,7 @@ class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Cal
     val countriesIpBroadcast = hiveContext.sparkContext.broadcast(networkCountries)
 
     val isInRange = udf((ip: String) => {
-      new CountryByIpFinder(countriesIpBroadcast.value).findCountryByIp(ip).orNull
+      CountryByIpFinder.findCountryByIp(countriesIpBroadcast.value, ip).orNull
     })
 
     events.withColumn("country_name", isInRange(events("ip_address"))).

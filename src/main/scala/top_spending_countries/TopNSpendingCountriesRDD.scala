@@ -19,9 +19,8 @@ class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Ca
       map(country => NetworkCountry(country.network, country.countryName))
     val countriesIpBroadcast = hiveContext.sparkContext.broadcast(networkCountries)
 
-
     purchases.map(entry => TotalPurchasesCountry(
-      new CountryByIpFinder(countriesIpBroadcast.value).findCountryByIp(entry.ipAddress).orNull,
+      CountryByIpFinder.findCountryByIp(countriesIpBroadcast.value, entry.ipAddress).orNull,
       entry.totalPurchases)).
       filter(r => r.country != null).
       keyBy(_.country).

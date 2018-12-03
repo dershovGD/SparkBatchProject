@@ -4,7 +4,7 @@ import java.io.Serializable
 
 import org.apache.commons.net.util.SubnetUtils
 
-class CountryByIpFinder(private val countriesIp: Array[NetworkCountry]) extends Serializable {
+object CountryByIpFinder extends Serializable {
   private val comparator = (n1: LowHighIpCountry, n2: LowHighIpCountry) => {
     if (n1.highIp < n2.lowIp) false
     else true
@@ -26,7 +26,7 @@ class CountryByIpFinder(private val countriesIp: Array[NetworkCountry]) extends 
       256L * 256L * 256L * Integer.parseInt(parts(0))
   }
 
-  def findCountryByIp(ip: String): Option[String] = {
+  def findCountryByIp(countriesIp: Array[NetworkCountry], ip: String): Option[String] = {
     val lowHighIpCountries = countriesIp.map(mapper).sortWith(comparator)
     binarySearch(lowHighIpCountries, ip)
   }

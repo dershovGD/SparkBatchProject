@@ -11,9 +11,9 @@ class CountryByIpFinderTest extends FunSuite {
       NetworkCountry("150.0.0.0/8", "Austria"),
       NetworkCountry("0.88.152.0/24", "USA"))
 
-    assert(new CountryByIpFinder(inputArray).findCountryByIp("62.121.0.56").get === "Germany")
-    assert(new CountryByIpFinder(inputArray).findCountryByIp("61.121.0.56") === None)
-    assert(new CountryByIpFinder(inputArray).findCountryByIp("234.42.135.1").get === "Russia")
+    assert(CountryByIpFinder.findCountryByIp(inputArray, "62.121.0.56").get === "Germany")
+    assert(CountryByIpFinder.findCountryByIp(inputArray, "61.121.0.56") === None)
+    assert(CountryByIpFinder.findCountryByIp(inputArray, "234.42.135.1").get === "Russia")
   }
 
 }
