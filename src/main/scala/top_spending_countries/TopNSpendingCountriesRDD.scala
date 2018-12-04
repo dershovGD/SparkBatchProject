@@ -11,16 +11,17 @@ class TopNSpendingCountriesRDD(private val inputFiles: Array[String]) extends Ca
   private val slf4jLogger = LoggerFactory.getLogger("TopNSpendingCountriesRDD")
 
   def calculateUsingRDD(hiveContext: HiveContext, n: Int): Array[(String, BigDecimal)] = {
-    val processor = new InputProcessor(hiveContext.sparkContext)
-    val purchases = processor.readEvents(inputPurchases).
+    val inputProcessor = new InputProcessor(hiveContext.sparkContext)
+    val purchases = inputProcessor.readEvents(inputPurchases).
       map(event => (event.ipAddress, event.productPrice)).
       reduceByKey(_ + _).
       map(r => TotalPurchasesIp(r._1, r._2))
     slf4jLogger.info("Events successfully read")
-    val networkCountries = processor.
-      readCountries(inputCountries)
 
-    val finder = new CountryByIpFinder(networkCountries)
+    val networkCountries = inputProcessor.
+      readCountries(inputCountries)
+    val countriesIpSorted = CountriesIpDataProcessor.processCountries(networkCountries)
+    val finder = new CountryByIpFinder(countriesIpSorted)
     val finderBroadcast = hiveContext.sparkContext.broadcast(finder)
     slf4jLogger.info("Countries broadcast created")
 

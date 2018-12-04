@@ -12,15 +12,15 @@ class TopNSpendingCountriesDF(private val inputFiles: Array[String]) extends Cal
   private val slf4jLogger = LoggerFactory.getLogger("TopNSpendingCountriesDF")
 
   def calculateUsingDF(hiveContext: HiveContext, n: Int): DataFrame = {
+    val inputProcessor = new InputProcessor(hiveContext.sparkContext)
     val schemaManager = new SchemaManager(hiveContext)
     val events = schemaManager.createEventsDF(inputPurchases)
-
-    val processor = new InputProcessor(hiveContext.sparkContext)
-    val networkCountries = processor.
-      readCountries(inputCountries)
     slf4jLogger.info("Events successfully read")
 
-    val finder = new CountryByIpFinder(networkCountries)
+    val networkCountries = inputProcessor.
+      readCountries(inputCountries)
+    val countriesIpSorted = CountriesIpDataProcessor.processCountries(networkCountries)
+    val finder = new CountryByIpFinder(countriesIpSorted)
     val finderBroadcast = hiveContext.sparkContext.broadcast(finder)
     slf4jLogger.info("Countries broadcast created")
 

@@ -2,45 +2,23 @@ package utils
 
 import java.io.Serializable
 
-import org.apache.commons.net.util.SubnetUtils
-
-class CountryByIpFinder(private val countriesIp: Array[Country]) extends Serializable {
-  private val comparator = (n1: LowHighIpCountry, n2: LowHighIpCountry) => {
-    if (n1.highIp < n2.lowIp) false
-    else true
-  }
-
-  private val mapper = (nc: Country) => {
-    val info = new SubnetUtils(nc.network).getInfo
-    LowHighIpCountry(
-      ipToLong(info.getLowAddress),
-      ipToLong(info.getHighAddress),
-      nc.countryName)
-  }
-
-  private def ipToLong(ip: String): Long = {
-    val parts = ip.split("\\.")
-    Integer.parseInt(parts(3)) +
-      256L * Integer.parseInt(parts(2)) +
-      256L * 256L * Integer.parseInt(parts(1)) +
-      256L * 256L * 256L * Integer.parseInt(parts(0))
-  }
+class CountryByIpFinder(private val lowHighIpCountries: Array[LowHighIpCountry]) extends Serializable {
 
   def findCountryByIp(ip: String): Option[String] = {
-    val lowHighIpCountries = countriesIp.map(mapper).sortWith(comparator)
-    binarySearch(lowHighIpCountries, ip)
+    binarySearch(0, lowHighIpCountries.length, ip)
   }
 
-  private def binarySearch(array: Array[LowHighIpCountry], ip: String): Option[String] = {
-    if (array.length == 0) return scala.None
-    val ipLongRepresentation = ipToLong(ip)
-    val medium = array.length / 2
-    if (ipLongRepresentation <= array(medium).highIp && ipLongRepresentation >= array(medium).lowIp) {
-      Option(array(medium).country)
-    } else if (ipLongRepresentation > array(medium).highIp) {
-      binarySearch(array.slice(0, medium), ip)
-    } else if (ipLongRepresentation < array(medium).lowIp) {
-      binarySearch(array.slice(medium + 1, array.length), ip)
+  private def binarySearch(fromIdx: Int, toIdx: Int, ip: String): Option[String] = {
+    if (fromIdx == toIdx) return scala.None
+    val ipLongRepresentation = CountriesIpDataProcessor.ipToLong(ip)
+    val medium = (toIdx + fromIdx) / 2
+    if (ipLongRepresentation <= lowHighIpCountries(medium).highIp &&
+      ipLongRepresentation >= lowHighIpCountries(medium).lowIp) {
+        Option(lowHighIpCountries(medium).country)
+    } else if (ipLongRepresentation > lowHighIpCountries(medium).highIp) {
+        binarySearch(fromIdx, medium, ip)
+    } else if (ipLongRepresentation < lowHighIpCountries(medium).lowIp) {
+        binarySearch(medium + 1, toIdx, ip)
     } else scala.None
   }
 }
